@@ -10,16 +10,13 @@ remote = BertecRemoteControl.RemoteControl()
 res = remote.start_connection()
 print(res)
 
-
-
-
 initialize_velocity = input("Set the initial velocity")
 
 pygame.init()
 screen = pygame.display.set_mode((640, 480))
 pygame.display.set_caption('Velocity')
 font = pygame.font.Font(None, 36)
-text = font.render(initialize_velocity,True, white, black)
+text = font.render(initialize_velocity, True, white, black)
 
 # params = remote.get_run_treadmill_user_input()
 res = remote.run_treadmill(initialize_velocity, 1, 1, initialize_velocity, 1, 1)
@@ -40,7 +37,7 @@ try:
 
         copy = res['copy']
         fz = res['fz']
-        if fz>500:
+        if fz > 500:
             if copy >= 1.12:
                 velocity = str(round(float(velocity)+0.05, 2))
                 res = remote.run_treadmill(velocity, 1, 1, velocity, 1, 1)
