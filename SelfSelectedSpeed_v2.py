@@ -1,88 +1,189 @@
-# import BertecRemoteControl
+import BertecRemoteControl
 from time import sleep
 import pygame
 
 from BertecSelfSelectedSpeedGUI import BertecSelfSelectedSpeedGUI as Bertec
 
-# TODO:
-#  Add treadmill Control
-#  Add COP marker
-#  setting speed change in each division
-#  adjusting speed
-#  Future work: Add symbolic library for equation control X
-#  add start and stop functionality
-#  add equal spacing to step
-#  Fix zone height readout
 
-# Defaults
-# Default Booleans:
-values = {'dead_zone': False,
-          'stop_zone': False,
-          'start': False,
-          'slow_eq_sp': False,
-          'fast_eq_sp': False,
-          'dead_zone_height': 0.1,
-          'stop_zone_height': 0.28,
-          'neutral_zone_height': 0.28,
-          'origin_location': 0.7,
-          'neutral_zone_location': 0.14,
-          'amount_fast_divisions': 2,
-          'amount_slow_divisions': 2,
-          'sample_frequency': 20,
-          'starting_velocity': 0,
-          'current_velocity': 0,
-          'acceleration': 1,
-          'velocity_change': 0,
-          'copx': 0,
-          'copy': 0,
-          'slow_linear_slope': 0.001,
-          'slow_linear_yintercept': 0,
-          'slow_equation': '0.001x',
-          'fast_linear_slope': 0.001,
-          'fast_linear_yintercept': 0,
-          'fast_equation': '0.001x',
-          'slow_division_locations': [0.112, 0.224, 0.336, 0.448],
-          'slow_velocity_changes': [0.01, 0.015, 0.02, 0.025, 0.03],
-          'fast_division_locations': [0.112, 0.224, 0.336, 0.448],
-          'fast_velocity_changes': [0.01, 0.015, 0.02, 0.025, 0.03],
-          'slow_control_type': 'step',
-          'fast_control_type': 'step'
-          }
-gui = Bertec(values)
+def set_treadmill(bertec_remote, velocity, acceleration):
+    bertec_remote.run_treadmill(velocity, acceleration, acceleration, velocity, acceleration, acceleration)
 
-values['fast_zone_height'] = 1.4-int(values['neutral_zone_height'])/2
-values['slow_zone_height'] = 1.4-int(values['neutral_zone_height'])/2
 
-velocity_change_first_fast_division = 0.01
-velocity_change_first_slow_division = 0.01
+remote = BertecRemoteControl.RemoteControl()
+res = remote.start_connection()
+try:
+    # Defaults
+    # Default Booleans:
+    values = {'dead_zone': False,
+              'stop_zone': False,
+              'start': False,
+              'slow_eq_sp': False,
+              'fast_eq_sp': False,
+              'dead_zone_height': 0.1,
+              'stop_zone_height': 0.28,
+              'neutral_zone_height': 0.28,
+              'origin_location': 0.7,
+              'neutral_zone_location': 0.14,
+              'amount_fast_divisions': 2,
+              'amount_slow_divisions': 2,
+              'sample_frequency': 20,
+              'starting_velocity': 0,
+              'current_velocity': 0,
+              'acceleration': 1,
+              'velocity_change': 0,
+              'copx': 0,
+              'copy': 0,
+              'slow_linear_slope': 0.001,
+              'slow_linear_yintercept': 0,
+              'slow_equation': '0.001x',
+              'fast_linear_slope': 0.001,
+              'fast_linear_yintercept': 0,
+              'fast_equation': '0.001x',
+              'slow_division_locations': [0.112, 0.224, 0.336, 0.448],
+              'slow_velocity_changes': [0.01, 0.015, 0.02, 0.025, 0.03],
+              'fast_division_locations': [0.112, 0.224, 0.336, 0.448],
+              'fast_velocity_changes': [0.01, 0.015, 0.02, 0.025, 0.03],
+              'slow_control_type': 'step',
+              'fast_control_type': 'step'
+              }
 
-treadmill_width = 0.7   # meters
-treadmill_length = 1.4  # meters
+    values['fast_zone_height'] = (1.4-values['neutral_zone_height'])/2
+    values['slow_zone_height'] = (1.4-values['neutral_zone_height'])/2
 
-clock = pygame.time.Clock()
+    gui = Bertec(values)
 
-# Drawing Rectangle
-while True:
-    time_delta = clock.tick(60) / 1000.0
+    weight_stop = False
+    weight_count = 0
 
-    # Actual zone calculations
-    if values['dead_zone']:
-        fast_zone_height = (treadmill_length-values['origin_location']-values['neutral_zone_height']
-                            + values['neutral_zone_location']-values['dead_zone_height'])
-    else:
-        fast_zone_height = (treadmill_length - values['origin_location']
-                            - values['neutral_zone_height']+values['neutral_zone_location'])
+    velocity_change_first_fast_division = 0.01
+    velocity_change_first_slow_division = 0.01
 
-    if values['stop_zone']:
-        slow_zone_height = values['origin_location'] - values['neutral_zone_location'] - values['stop_zone_height']
-    else:
-        slow_zone_height = values['origin_location'] - values['neutral_zone_location']
+    treadmill_width = 0.7   # meters
+    treadmill_length = 1.4  # meters
 
-    gui.draw_treadmill(values)
-    gui.update_text(values)
+    clock = pygame.time.Clock()
 
-    pygame.display.flip()
-    gui.events(values)
-    gui.update(time_delta)
+    # Drawing Rectangle
+    while True:
+        time_delta = clock.tick(60) / 1000.0
 
-    sleep(1/values['sample_frequency'])
+        # Actual zone calculations
+        if values['dead_zone']:
+            values['fast_zone_height'] = (treadmill_length-values['origin_location']-values['neutral_zone_height']
+                                          + values['neutral_zone_location']-values['dead_zone_height'])
+        else:
+            values['fast_zone_height'] = (treadmill_length - values['origin_location']
+                                          - values['neutral_zone_height']+values['neutral_zone_location'])
+
+        if values['stop_zone']:
+            values['slow_zone_height'] = (values['origin_location'] - values['neutral_zone_location']
+                                          - values['stop_zone_height'])
+        else:
+            values['slow_zone_height'] = values['origin_location'] - values['neutral_zone_location']
+
+        values['copx'] = res['copx']
+        values['copy'] = res['copy']
+        fz = res['fz']
+
+        if fz > 500:
+            weight_count = 0
+        else:
+            weight_count += 1
+            if weight_count == values['sample_frequency']*2:
+                weight_count = True
+
+        if values['start'] and not weight_stop:
+            if values['stop_zone'] and values['copy'] <= values['stop_zone_height']:
+                quit()
+            elif values['copy'] < values['origin_location']-values['neutral_zone_location']:
+                distance_from_neutral = (values['origin_location']
+                                         - values['neutral_zone_location'] - values['copy'])
+                match values['slow_control_type']:
+                    case 'step':
+                        match values['slow_eq_sp']:
+                            case True:
+                                slow_eq_sp_divisions = []
+                                slow_eq_sp_divisions_size = round(
+                                    values['slow_zone_height']/values['amount_slow_divisions'], 3)
+                                for division_num in range(0, values['amount_slow_divisions']):
+                                    slow_eq_sp_divisions.append(division_num*slow_eq_sp_divisions_size)
+                                if distance_from_neutral < slow_eq_sp_divisions_size[-1]:
+                                    values['velocity_change'] = (
+                                        values['slow_velocity_changes'][values['amount_slow_divisions']-1])
+                                else:
+                                    for division_num in range(0, len(slow_eq_sp_divisions)):
+                                        if distance_from_neutral > slow_eq_sp_divisions_size[division_num]:
+                                            values['velocity_change'] = values['slow_velocity_changes'][division_num]
+                            case False:
+                                if distance_from_neutral < (
+                                        values['slow_division_locations'][values['amount_slow_divisions']-1]):
+                                    values['velocity_change'] = (
+                                        values['slow_velocity_changes'][values['amount_slow_divisions']-1])
+                                else:
+                                    for division_num in range(0, values['amount_slow_divisions']):
+                                        if distance_from_neutral > values['slow_division_locations'][division_num]:
+                                            values['velocity_change'] = values['slow_velocity_changes'][division_num]
+                    case 'linear':
+                        values['velocity_change'] = (-1*distance_from_neutral*values['slow_linear_slope']
+                                                     - values['slow_linear_yintercept'])
+                    case 'equation':
+                        print('equation functionality not ready')
+                        quit()
+            elif values['dead_zone'] and values['copy'] > 1.4 - values['dead_zone_height']:
+                pass
+            elif values['copy'] > (values['origin_location']
+                                   - values['neutral_zone_location']+values['neutral_zone_height']):
+                distance_from_neutral = (values['copy']-values['origin_location']
+                                         - values['neutral_zone_location']+values['neutral_zone_height'])
+                match values['fast_control_type']:
+                    case 'step':
+                        match values['fast_eq_sp']:
+                            case True:
+                                fast_eq_sp_divisions = []
+                                fast_eq_sp_divisions_size = round(
+                                    values['fast_zone_height'] / values['amount_fast_divisions'], 3)
+                                for division_num in range(0, values['amount_fast_divisions']):
+                                    fast_eq_sp_divisions.append(division_num * fast_eq_sp_divisions_size)
+                                if distance_from_neutral > fast_eq_sp_divisions_size[-1]:
+                                    values['velocity_change'] = (
+                                        values['fast_velocity_changes'][values['amount_fast_divisions'] - 1])
+                                else:
+                                    for division_num in range(0, len(fast_eq_sp_divisions)):
+                                        if distance_from_neutral < fast_eq_sp_divisions_size[division_num]:
+                                            values['velocity_change'] = values['fast_velocity_changes'][division_num]
+                            case False:
+                                if distance_from_neutral > (
+                                        values['fast_division_locations'][values['amount_fast_divisions']-1]):
+                                    values['velocity_change'] = (
+                                        values['fast_velocity_changes'][values['amount_fast_divisions']-1])
+                                else:
+                                    for division_num in range(0, values['amount_fast_divisions']):
+                                        if distance_from_neutral < values['fast_division_locations'][division_num]:
+                                            values['velocity_change'] = values['fast_velocity_changes'][division_num]
+
+                    case 'linear':
+                        values['velocity_change'] = (distance_from_neutral * values['slow_linear_slope']
+                                                     + values['slow_linear_yintercept'])
+                    case 'equation':
+                        print('equation functionality not ready')
+                        quit()
+            else:
+                values['velocity_change'] = 0
+
+            values['current_velocity'] = values['current_velocity'] + values['velocity_change']
+            if values['velocity_change'] != 0:
+                set_treadmill(remote, values['current_velocity'], values['acceleration'])
+
+        gui.calc_update(values)
+
+        gui.draw_treadmill()
+        gui.update_text()
+
+        pygame.display.flip()
+        values = gui.events()
+        gui.update(time_delta)
+
+        sleep(1/values['sample_frequency'])
+finally:
+    set_treadmill(remote, 0, 2)
+    pygame.quit()
