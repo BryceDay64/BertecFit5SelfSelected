@@ -79,6 +79,8 @@ class BertecSelfSelectedSpeedGUI:
         self.screen.blit(self.slow_control_section_text, (self.treadmill_display_right + 10, 490))  # 440
         self.fast_control_section_text = self.font.render('Fast:', True, self.black)
         self.screen.blit(self.fast_control_section_text, (self.treadmill_display_right + 10, 580))  # 440
+        self.enter_text = self.font.render('To commit values press "Enter"', True, self.black)
+        self.screen.blit(self.enter_text, (self.treadmill_display_right + 90, 15))
 
         # Check Boxes
         self.dead_zone_cb = pygame_gui.elements.UICheckBox(relative_rect=pygame.Rect(
@@ -260,7 +262,7 @@ class BertecSelfSelectedSpeedGUI:
 
         # Draw COP indicator
         pygame.draw.ellipse(self.screen, self.black, pygame.Rect(
-            30+(self.treadmill_display_width/2)-5+int(round(self.values['copx']*self.treadmill_display_mult, 0)),
+            30+(self.treadmill_display_width/2)-5,  # +int(round(self.values['copx']*self.treadmill_display_mult, 0))
             self.treadmill_display_bottom-5-int(round(self.values['copy']*self.treadmill_display_mult,0)),
             10,
             10))
@@ -270,17 +272,30 @@ class BertecSelfSelectedSpeedGUI:
                                                               5,
                                                               self.treadmill_display_bottom
                                                               - self.treadmill_display_top + 4))
+        pygame.draw.rect(self.screen, self.white, pygame.Rect(30,
+                                                              self.treadmill_display_top - 5,
+                                                              self.treadmill_display_width,
+                                                              5))
+        pygame.draw.rect(self.screen, self.white, pygame.Rect(30,
+                                                              self.treadmill_display_bottom,
+                                                              self.treadmill_display_width,
+                                                              5))
+
 
     def update_text(self):
         # Draw boxes to erase previous text
         pygame.draw.rect(self.screen, self.white, pygame.Rect(30,
-                                                              self.treadmill_display_bottom + 2,
-                                                              self.treadmill_display_width + 50,
+                                                              self.treadmill_display_bottom + 20,
+                                                              self.treadmill_display_width+100,
                                                               self.screen_height - self.treadmill_display_bottom))
         pygame.draw.rect(self.screen, self.white, pygame.Rect(0,
                                                               0,
-                                                              self.treadmill_display_width + 50,
+                                                              self.treadmill_display_width + 100,
                                                               self.treadmill_display_top - 5))
+        pygame.draw.rect(self.screen, self.white, pygame.Rect(599,
+                                                              29,
+                                                              201,
+                                                              100))
         # Add new text
         current_velocity_text = self.large_font.render(
             'Current Speed: ' + str(round(self.values['current_velocity'], 3))+' m/s', True, self.black)
@@ -302,6 +317,14 @@ class BertecSelfSelectedSpeedGUI:
         slow_zone_height_text = self.large_font.render(
             'Slow Zone Height: ' + str(round(self.values['slow_zone_height'], 3)), True, self.black)
         self.screen.blit(slow_zone_height_text, (30, 760))  # 440
+
+        if self.values['weight_stop']:
+            weight_stop_text = self.large_font.render('Weight Stop!', True, self.red)
+            self.screen.blit(weight_stop_text, (600,30))
+
+        if self.values['wrap']:
+            wrap_text = self.large_font.render('Velocity Wrap!', True, self.red)
+            self.screen.blit(wrap_text, (600, 80))
 
     def clear_slow_control_zone(self):
         pygame.draw.rect(self.screen, self.white, pygame.Rect(self.treadmill_display_right + 50,
