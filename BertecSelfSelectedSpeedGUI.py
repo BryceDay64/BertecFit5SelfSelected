@@ -7,6 +7,8 @@ class BertecSelfSelectedSpeedGUI:
 
     def __init__(self, values):
 
+        self.values = values
+
         # Define colors
         self.red = (255, 0, 0)
         self.purple = (128, 0, 128)
@@ -48,7 +50,7 @@ class BertecSelfSelectedSpeedGUI:
         self.large_font = pygame.font.Font(None, 36)
 
         self.current_velocity_text = self.large_font.render(
-            'Current Speed: ' + str(values['current_velocity']) + ' m/s', True, self.black)
+            'Current Speed: ' + str(self.values['current_velocity']) + ' m/s', True, self.black)
         self.screen.blit(self.current_velocity_text, (30, self.treadmill_display_top - 30))
 
         self.dead_zone_text = self.font.render('Dead Zone', True, self.black)
@@ -87,28 +89,28 @@ class BertecSelfSelectedSpeedGUI:
         # Text Boxes
         self.dead_zone_tb = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect(
             (self.treadmill_display_right + 210, 40), (100, 30)),
-            initial_text=str(values['dead_zone_height']), manager=self.manager)  # 620
+            initial_text=str(self.values['dead_zone_height']), manager=self.manager)  # 620
         self.stop_zone_tb = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect(
             (self.treadmill_display_right + 210, 80), (100, 30)),
-            initial_text=str(values['stop_zone_height']), manager=self.manager)  # 620
+            initial_text=str(self.values['stop_zone_height']), manager=self.manager)  # 620
         self.origin_location_tb = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect(
             (self.treadmill_display_right + 210, 120), (100, 30)),
-            initial_text=str(values['origin_location']), manager=self.manager)  # 620
+            initial_text=str(self.values['origin_location']), manager=self.manager)  # 620
         self.neutral_zone_location_tb = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect(
             (self.treadmill_display_right + 210, 160), (100, 30)),
-            initial_text=str(values['neutral_zone_location']), manager=self.manager)  # 620
+            initial_text=str(self.values['neutral_zone_location']), manager=self.manager)  # 620
         self.neutral_zone_height_tb = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect(
             (self.treadmill_display_right + 210, 200), (100, 30)),
-            initial_text=str(values['neutral_zone_height']), manager=self.manager)  # 620
+            initial_text=str(self.values['neutral_zone_height']), manager=self.manager)  # 620
         self.starting_velocity_tb = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect(
             (self.treadmill_display_right + 210, 260), (100, 30)), initial_text=str(values['starting_velocity']),
             manager=self.manager)  # 620
         self.acceleration_tb = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect(
             (self.treadmill_display_right + 210, 300), (100, 30)),
-            initial_text=str(values['acceleration']), manager=self.manager)  # 620
+            initial_text=str(self.values['acceleration']), manager=self.manager)  # 620
         self.sample_frequency_tb = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect(
             (self.treadmill_display_right + 210, 340), (100, 30)),
-            initial_text=str(values['sample_frequency']), manager=self.manager)  # 620
+            initial_text=str(self.values['sample_frequency']), manager=self.manager)  # 620
 
         # buttons
         self.start_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect(
@@ -129,33 +131,33 @@ class BertecSelfSelectedSpeedGUI:
             (328, 417), (100, 66)),
             item_list=['step', 'linear', 'equation'], default_selection='step', manager=self.manager)
 
-        values = self.step_control_layout(values,'slow')
-        values = self.step_control_layout(values, 'fast')
+        self.step_control_layout('slow')
+        self.step_control_layout('fast')
 
-    def draw_treadmill(self, values):
+    def draw_treadmill(self):
         # Display Calculations
         # Stop Zone
-        stop_zone_display_top = self.treadmill_display_bottom - values['stop_zone_height'] * self.treadmill_display_mult
+        stop_zone_display_top = self.treadmill_display_bottom - self.values['stop_zone_height'] * self.treadmill_display_mult
         stop_zone_display_height = self.treadmill_display_bottom - stop_zone_display_top
 
         # Neutral Zone
         neutral_zone_display_top = self.treadmill_display_bottom - self.treadmill_display_mult * (
-                values['origin_location'] + (values['neutral_zone_height'] - values['neutral_zone_location']))
-        neutral_zone_display_height = values['neutral_zone_height'] * self.treadmill_display_mult
+                self.values['origin_location'] + (self.values['neutral_zone_height'] - self.values['neutral_zone_location']))
+        neutral_zone_display_height = self.values['neutral_zone_height'] * self.treadmill_display_mult
 
         # Slow Zone
         slow_zone_display_top = neutral_zone_display_top + neutral_zone_display_height
-        if values['stop_zone']:
+        if self.values['stop_zone']:
             slow_zone_display_height = stop_zone_display_top - slow_zone_display_top
         else:
             slow_zone_display_height = self.treadmill_display_bottom - slow_zone_display_top
 
         # Dead Zone
         dead_zone_display_top = self.treadmill_display_top
-        dead_zone_display_height = values['dead_zone_height'] * self.treadmill_display_mult
+        dead_zone_display_height = self.values['dead_zone_height'] * self.treadmill_display_mult
 
         # Fast Zone
-        if values['dead_zone']:
+        if self.values['dead_zone']:
             fast_zone_display_top = dead_zone_display_top + dead_zone_display_height
             fast_zone_display_height = neutral_zone_display_top - dead_zone_display_top - dead_zone_display_height
         else:
@@ -163,11 +165,11 @@ class BertecSelfSelectedSpeedGUI:
             fast_zone_display_height = neutral_zone_display_top - self.treadmill_display_top
 
         # Origin Line
-        origin_display_location = self.treadmill_display_bottom-values['origin_location']*self.treadmill_display_mult
+        origin_display_location = self.treadmill_display_bottom-self.values['origin_location']*self.treadmill_display_mult
 
         # Draw Display Treadmill
         # Draw Stop Zone
-        if values["stop_zone"]:
+        if self.values["stop_zone"]:
             pygame.draw.rect(
                 self.screen, self.red, pygame.Rect(30,
                                                    stop_zone_display_top,
@@ -194,7 +196,7 @@ class BertecSelfSelectedSpeedGUI:
                                                  fast_zone_display_height))
 
         # Draw Dead Zone
-        if values['dead_zone']:
+        if self.values['dead_zone']:
             pygame.draw.rect(
                 self.screen, self.black, pygame.Rect(30,
                                                      dead_zone_display_top,
@@ -225,27 +227,43 @@ class BertecSelfSelectedSpeedGUI:
         pygame.draw.line(self.screen, self.purple, (30, origin_display_location),
                          (30 + self.treadmill_display_width, origin_display_location), 2)
 
-
-        if values['fast_control_type'] == 'step':
-            if values['fast_eq_sp']:
+        if self.values['fast_control_type'] == 'step':
                 # Draw fast division lines
-                for division in range(0, values['amount_fast_divisions']):
-                    if division != values['amount_fast_divisions']:
-                        fast_division_line_display_location = neutral_zone_display_top - (division + 1) * (
-                                fast_zone_display_height / values['amount_fast_divisions'])
-                        pygame.draw.line(self.screen, self.black, (30, fast_division_line_display_location),
-                                         (30 + self.treadmill_display_width, fast_division_line_display_location), 2)
-        if values['slow_control_type'] == 'step':
-            if values['slow_eq_sp']:
+                for division in range(0, self.values['amount_fast_divisions']):
+                    if self.values['fast_eq_sp']:
+                        if division != self.values['amount_fast_divisions']:
+                            fast_division_line_display_location = neutral_zone_display_top - (division + 1) * (
+                                    fast_zone_display_height / self.values['amount_fast_divisions'])
+                            pygame.draw.line(self.screen, self.black, (30, fast_division_line_display_location),
+                                             (30 + self.treadmill_display_width, fast_division_line_display_location),
+                                             2)
+                    else:
+                        if division != 0:
+                            fast_division_line_display_location = (neutral_zone_display_top
+                                                                   - self.values['fast_division_locations'][division-1]*self.treadmill_display_mult)
+                            pygame.draw.line(self.screen, self.black, (30, fast_division_line_display_location),
+                                             (30 + self.treadmill_display_width, fast_division_line_display_location), 2)
+
+        if self.values['slow_control_type'] == 'step':
                 # Draw slow division lines
-                for division in range(0, values['amount_slow_divisions']):
+                for division in range(0, self.values['amount_slow_divisions']):
                     if division != 0:
-                        slow_division_line_display_location = slow_zone_display_top + division * (
-                                slow_zone_display_height / values['amount_slow_divisions'])
+                        if self.values['slow_eq_sp']:
+                            slow_division_line_display_location = slow_zone_display_top + division * (
+                                    slow_zone_display_height / self.values['amount_slow_divisions'])
+                        else:
+                            slow_division_line_display_location = (
+                                    slow_zone_display_top + self.values['slow_division_locations'][division-1]
+                                    * self.treadmill_display_mult)
                         pygame.draw.line(self.screen, self.black, (30, slow_division_line_display_location),
                                          (30 + self.treadmill_display_width, slow_division_line_display_location), 2)
-        # Draw COP indicator
 
+        # Draw COP indicator
+        pygame.draw.ellipse(self.screen, self.black, pygame.Rect(
+            30+(self.treadmill_display_width/2)-5+int(round(self.values['copx']*self.treadmill_display_mult, 0)),
+            self.treadmill_display_bottom-5-int(round(self.values['copy']*self.treadmill_display_mult,0)),
+            10,
+            10))
         # Draw cleaning box
         pygame.draw.rect(self.screen, self.white, pygame.Rect(self.treadmill_display_right - 1,
                                                               self.treadmill_display_top - 2,
@@ -253,7 +271,7 @@ class BertecSelfSelectedSpeedGUI:
                                                               self.treadmill_display_bottom
                                                               - self.treadmill_display_top + 4))
 
-    def update_text(self, values):
+    def update_text(self):
         # Draw boxes to erase previous text
         pygame.draw.rect(self.screen, self.white, pygame.Rect(30,
                                                               self.treadmill_display_bottom + 2,
@@ -265,27 +283,27 @@ class BertecSelfSelectedSpeedGUI:
                                                               self.treadmill_display_top - 5))
         # Add new text
         current_velocity_text = self.large_font.render(
-            'Current Speed: ' + str(round(values['current_velocity'], 3))+' m/s', True, self.black)
+            'Current Speed: ' + str(round(self.values['current_velocity'], 3))+' m/s', True, self.black)
         self.screen.blit(current_velocity_text, (30, self.treadmill_display_top - 30))
 
         current_velocity_change_text = self.large_font.render(
-            'Speed Change: ' + str(round(values['velocity_change'], 3)) + ' m/s', True, self.black)
+            'Speed Change: ' + str(round(self.values['velocity_change'], 3)) + ' m/s', True, self.black)
         self.screen.blit(current_velocity_change_text, (30, self.treadmill_display_top - 70))
 
-        fast_zone_height_text = self.large_font.render(
-            'COP location: (' + str(round(values['copx'], 3)) + ', ' + str(round(values['copy'], 3)) + ')',
+        cop_location_text = self.large_font.render(
+            'COP location: (' + str(round(self.values['copx'], 3)) + ', ' + str(round(self.values['copy'], 3)) + ')',
             True, self.black)
-        self.screen.blit(fast_zone_height_text, (30, 680))  # 440
+        self.screen.blit(cop_location_text, (30, 680))  # 440
 
         fast_zone_height_text = self.large_font.render(
-            'Fast Zone Height: ' + str(round(values['fast_zone_height'], 3)), True, self.black)
+            'Fast Zone Height: ' + str(round(self.values['fast_zone_height'], 3)), True, self.black)
         self.screen.blit(fast_zone_height_text, (30, 720))  # 440
 
         slow_zone_height_text = self.large_font.render(
-            'Slow Zone Height: ' + str(round(values['slow_zone_height'], 3)), True, self.black)
+            'Slow Zone Height: ' + str(round(self.values['slow_zone_height'], 3)), True, self.black)
         self.screen.blit(slow_zone_height_text, (30, 760))  # 440
 
-    def clear_slow_control_zone(self, values):
+    def clear_slow_control_zone(self):
         pygame.draw.rect(self.screen, self.white, pygame.Rect(self.treadmill_display_right + 50,
                                                               485,
                                                               750-self.treadmill_display_right,
@@ -293,8 +311,8 @@ class BertecSelfSelectedSpeedGUI:
         if self.slow_step:
             self.slow_divisions_tb.hide()
             self.slow_equally_spaced_cb.hide()
-            slow_current_delete = values['amount_slow_divisions']
-            values['slow_eq_sp'] = False
+            slow_current_delete = self.values['amount_slow_divisions']
+            self.values['slow_eq_sp'] = False
             self.slow_velocity_change_tb_1.hide()
             self.slow_step_location_tb_2.hide()
             while slow_current_delete > 0:
@@ -317,9 +335,7 @@ class BertecSelfSelectedSpeedGUI:
         if self.slow_equation:
             self.slow_equation_tb.hide()
 
-        return values
-
-    def clear_fast_control_zone(self, values):
+    def clear_fast_control_zone(self):
         pygame.draw.rect(self.screen, self.white, pygame.Rect(self.treadmill_display_right + 50,
                                                               577,
                                                               750-self.treadmill_display_right,
@@ -327,8 +343,8 @@ class BertecSelfSelectedSpeedGUI:
         if self.fast_step:
             self.fast_divisions_tb.hide()
             self.fast_equally_spaced_cb.hide()
-            fast_current_delete = values['amount_fast_divisions']
-            values['fast_eq_sp'] = False
+            fast_current_delete = self.values['amount_fast_divisions']
+            self.values['fast_eq_sp'] = False
             self.fast_velocity_change_tb_1.hide()
             self.fast_step_location_tb_2.hide()
             while fast_current_delete > 0:
@@ -351,30 +367,28 @@ class BertecSelfSelectedSpeedGUI:
         if self.fast_equation:
             self.fast_equation_tb.hide()
 
-        return values
-
-    def step_control_layout(self, values, zone):
+    def step_control_layout(self, zone):
         if zone == 'slow':
             # textbox
             self.slow_divisions_tb = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect(
-                (self.treadmill_display_right + 225, 488), (25, 20)), initial_text=str(values['amount_slow_divisions']),
+                (self.treadmill_display_right + 225, 488), (25, 20)), initial_text=str(self.values['amount_slow_divisions']),
                 manager=self.manager)  # 620
-            self.create_step_text_box(values, 'slow', 'velocity_change', 1)
-            slow_current_add = values['amount_slow_divisions']
+            self.create_step_text_box('slow', 'velocity_change', 1)
+            slow_current_add = self.values['amount_slow_divisions']
             while slow_current_add > 0:
                 match slow_current_add:
                     case 5:
-                        self.create_step_text_box(values, 'slow', 'velocity_change', 5)
-                        self.create_step_text_box(values, 'slow', 'division_location', 5)
+                        self.create_step_text_box('slow', 'velocity_change', 5)
+                        self.create_step_text_box('slow', 'division_location', 5)
                     case 4:
-                        self.create_step_text_box(values, 'slow', 'velocity_change', 4)
-                        self.create_step_text_box(values, 'slow', 'division_location', 4)
+                        self.create_step_text_box('slow', 'velocity_change', 4)
+                        self.create_step_text_box('slow', 'division_location', 4)
                     case 3:
-                        self.create_step_text_box(values, 'slow', 'velocity_change', 3)
-                        self.create_step_text_box(values, 'slow', 'division_location', 3)
+                        self.create_step_text_box('slow', 'velocity_change', 3)
+                        self.create_step_text_box('slow', 'division_location', 3)
                     case 2:
-                        self.create_step_text_box(values, 'slow', 'velocity_change', 2)
-                        self.create_step_text_box(values, 'slow', 'division_location', 2)
+                        self.create_step_text_box('slow', 'velocity_change', 2)
+                        self.create_step_text_box('slow', 'division_location', 2)
                 slow_current_add -= 1
 
 
@@ -392,29 +406,29 @@ class BertecSelfSelectedSpeedGUI:
             slow_division_location_text = self.font.render('Location of Divisions from Neutral:', True, self.black)
             self.screen.blit(slow_division_location_text, (self.treadmill_display_right + 50, 550))
 
-            values['slow_control_type'] = 'step'
+            self.values['slow_control_type'] = 'step'
         elif zone == 'fast':
             # textbox
             self.fast_divisions_tb = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect(
-                (self.treadmill_display_right + 225, 578), (25, 20)), initial_text=str(values['amount_fast_divisions']),
+                (self.treadmill_display_right + 225, 578), (25, 20)), initial_text=str(self.values['amount_fast_divisions']),
                 manager=self.manager)  # 488
-            self.create_step_text_box(values, 'fast', 'velocity_change', 1)
-            fast_current_add = values['amount_fast_divisions']
+            self.create_step_text_box('fast', 'velocity_change', 1)
+            fast_current_add = self.values['amount_fast_divisions']
             while fast_current_add > 0:
                 match fast_current_add:
                     case 5:
-                        self.create_step_text_box(values, 'fast', 'velocity_change', 5)
-                        self.create_step_text_box(values, 'fast', 'division_location', 5)
+                        self.create_step_text_box('fast', 'velocity_change', 5)
+                        self.create_step_text_box('fast', 'division_location', 5)
                     case 4:
-                        self.create_step_text_box(values, 'fast', 'velocity_change', 4)
-                        self.create_step_text_box(values, 'fast', 'division_location', 4)
+                        self.create_step_text_box('fast', 'velocity_change', 4)
+                        self.create_step_text_box('fast', 'division_location', 4)
 
                     case 3:
-                        self.create_step_text_box(values, 'fast', 'velocity_change', 3)
-                        self.create_step_text_box(values, 'fast', 'division_location', 3)
+                        self.create_step_text_box('fast', 'velocity_change', 3)
+                        self.create_step_text_box('fast', 'division_location', 3)
                     case 2:
-                        self.create_step_text_box(values, 'fast', 'velocity_change', 2)
-                        self.create_step_text_box(values, 'fast', 'division_location', 2)
+                        self.create_step_text_box('fast', 'velocity_change', 2)
+                        self.create_step_text_box('fast', 'division_location', 2)
                 fast_current_add -= 1
 
             # checkbox
@@ -434,8 +448,7 @@ class BertecSelfSelectedSpeedGUI:
                 'Location of Divisions from Neutral:', True, self.black)
             self.screen.blit(fast_division_location_text, (self.treadmill_display_right + 50, 640))  # 530
 
-            values['fast_control_type'] = 'step'
-        return values
+            self.values['fast_control_type'] = 'step'
 
     def linear_control_layout(self, zone):
         if zone == 'slow':
@@ -450,8 +463,10 @@ class BertecSelfSelectedSpeedGUI:
             # text
             slow_linear_text = self.font.render('Enter your linear Equation', True, self.black)
             self.screen.blit(slow_linear_text, (self.treadmill_display_right + 50, 490))
-            slow_linear_equation_text = self.font.render('Δv(x) = -               x + ', True, self.black)
+            slow_linear_equation_text = self.font.render('Δv(x) = -               x - ', True, self.black)
             self.screen.blit(slow_linear_equation_text, (self.treadmill_display_right + 50, 510))
+
+            self.values['slow_control_type'] = 'linear'
 
         elif zone == 'fast':
             # textbox
@@ -470,6 +485,8 @@ class BertecSelfSelectedSpeedGUI:
                 'Δv(x) =                 x + ', True, self.black)
             self.screen.blit(fast_linear_equation_text, (self.treadmill_display_right + 50, 600))  # 510
 
+            self.values['fast_control_type'] = 'linear'
+
     def equation_control_layout(self, zone):
         if zone == 'slow':
             # textbox
@@ -483,6 +500,8 @@ class BertecSelfSelectedSpeedGUI:
             slow_equation_text = self.font.render('Δv(x) = ', True, self.black)
             self.screen.blit(slow_equation_text, (self.treadmill_display_right + 50, 510))
 
+            self.values['slow_control_type'] = 'equation'
+
         elif zone == 'fast':
             # textbox
             self.fast_equation_tb = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect(
@@ -495,7 +514,9 @@ class BertecSelfSelectedSpeedGUI:
             self.screen.blit(fast_wip_text, (self.treadmill_display_right + 50, 580))  # 490
             fast_equation_text = self.font.render('Δv(x) = ', True, self.black)
             self.screen.blit(fast_equation_text, (self.treadmill_display_right + 50, 600))
-    def create_step_text_box(self, values, zone, tb_type, number):
+
+            self.values['fast_control_type'] = 'equation'
+    def create_step_text_box(self, zone, tb_type, number):
         match zone:
             case 'slow':
                 match tb_type:
@@ -505,48 +526,48 @@ class BertecSelfSelectedSpeedGUI:
                                 self.slow_step_location_tb_2 = pygame_gui.elements.UITextEntryLine(
                                     relative_rect=pygame.Rect(
                                         (self.treadmill_display_right + 330, 547), (40, 20)),
-                                    initial_text=str(values['slow_division_locations'][0]), manager=self.manager)  # 620
+                                    initial_text=str(self.values['slow_division_locations'][0]), manager=self.manager)  # 620
                             case 3:
                                 self.slow_step_location_tb_3 = pygame_gui.elements.UITextEntryLine(
                                     relative_rect=pygame.Rect(
                                         (self.treadmill_display_right + 380, 547), (40, 20)),
-                                    initial_text=str(values['slow_division_locations'][1]), manager=self.manager)  # 620
+                                    initial_text=str(self.values['slow_division_locations'][1]), manager=self.manager)  # 620
                             case 4:
                                 self.slow_step_location_tb_4 = pygame_gui.elements.UITextEntryLine(
                                     relative_rect=pygame.Rect(
                                         (self.treadmill_display_right + 430, 547), (40, 20)),
-                                    initial_text=str(values['slow_division_locations'][2]), manager=self.manager)
+                                    initial_text=str(self.values['slow_division_locations'][2]), manager=self.manager)
                             case 5:
                                 self.slow_step_location_tb_5 = pygame_gui.elements.UITextEntryLine(
                                     relative_rect=pygame.Rect(
                                         (self.treadmill_display_right + 480, 547), (40, 20)),
-                                    initial_text=str(values['slow_division_locations'][3]), manager=self.manager)  # 620
+                                    initial_text=str(self.values['slow_division_locations'][3]), manager=self.manager)  # 620
                     case 'velocity_change':
                         match number:
                             case 1:
                                 self.slow_velocity_change_tb_1 = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect(
                                     (self.treadmill_display_right + 280, 526), (40, 20)),
-                                    initial_text=str(values['slow_velocity_changes'][0]), manager=self.manager)  # 620
+                                    initial_text=str(self.values['slow_velocity_changes'][0]), manager=self.manager)  # 620
                             case 2:
                                 self.slow_velocity_change_tb_2 = pygame_gui.elements.UITextEntryLine(
                                     relative_rect=pygame.Rect(
                                         (self.treadmill_display_right + 330, 526), (40, 20)),
-                                    initial_text=str(values['slow_velocity_changes'][1]), manager=self.manager)  # 620
+                                    initial_text=str(self.values['slow_velocity_changes'][1]), manager=self.manager)  # 620
                             case 3:
                                 self.slow_velocity_change_tb_3 = pygame_gui.elements.UITextEntryLine(
                                     relative_rect=pygame.Rect(
                                         (self.treadmill_display_right + 380, 526), (40, 20)),
-                                    initial_text=str(values['slow_velocity_changes'][2]), manager=self.manager)  # 620
+                                    initial_text=str(self.values['slow_velocity_changes'][2]), manager=self.manager)  # 620
                             case 4:
                                 self.slow_velocity_change_tb_4 = pygame_gui.elements.UITextEntryLine(
                                     relative_rect=pygame.Rect(
                                         (self.treadmill_display_right + 430, 526), (40, 20)),
-                                    initial_text=str(values['slow_velocity_changes'][3]), manager=self.manager)  # 620
+                                    initial_text=str(self.values['slow_velocity_changes'][3]), manager=self.manager)  # 620
                             case 5:
                                 self.slow_velocity_change_tb_5 = pygame_gui.elements.UITextEntryLine(
                                     relative_rect=pygame.Rect(
                                         (self.treadmill_display_right + 480, 526), (40, 20)),
-                                    initial_text=str(values['slow_velocity_changes'][4]), manager=self.manager)  # 620
+                                    initial_text=str(self.values['slow_velocity_changes'][4]), manager=self.manager)  # 620
             case 'fast':
                 match tb_type:
                     case 'division_location':
@@ -555,51 +576,51 @@ class BertecSelfSelectedSpeedGUI:
                                 self.fast_step_location_tb_2 = pygame_gui.elements.UITextEntryLine(
                                     relative_rect=pygame.Rect(
                                         (self.treadmill_display_right + 330, 637), (40, 20)),
-                                    initial_text=str(values['fast_division_locations'][0]), manager=self.manager)  # 620
+                                    initial_text=str(self.values['fast_division_locations'][0]), manager=self.manager)  # 620
                             case 3:
                                 self.fast_step_location_tb_3 = pygame_gui.elements.UITextEntryLine(
                                     relative_rect=pygame.Rect(
                                         (self.treadmill_display_right + 380, 637), (40, 20)),
-                                    initial_text=str(values['fast_division_locations'][1]), manager=self.manager)  # 620
+                                    initial_text=str(self.values['fast_division_locations'][1]), manager=self.manager)  # 620
                             case 4:
                                 self.fast_step_location_tb_4 = pygame_gui.elements.UITextEntryLine(
                                     relative_rect=pygame.Rect(
                                         (self.treadmill_display_right + 430, 637), (40, 20)),
-                                    initial_text=str(values['fast_division_locations'][2]), manager=self.manager)  # 620
+                                    initial_text=str(self.values['fast_division_locations'][2]), manager=self.manager)  # 620
                             case 5:
                                 self.fast_step_location_tb_5 = pygame_gui.elements.UITextEntryLine(
                                     relative_rect=pygame.Rect(
                                         (self.treadmill_display_right + 480, 637), (40, 20)),
-                                    initial_text=str(values['fast_division_locations'][3]), manager=self.manager)  # 620
+                                    initial_text=str(self.values['fast_division_locations'][3]), manager=self.manager)  # 620
                     case 'velocity_change':
                         match number:
                             case 1:
                                 self.fast_velocity_change_tb_1 = pygame_gui.elements.UITextEntryLine(
                                     relative_rect=pygame.Rect(
                                         (self.treadmill_display_right + 280, 616), (40, 20)),
-                                    initial_text=str(values['fast_velocity_changes'][0]), manager=self.manager)  # 620
+                                    initial_text=str(self.values['fast_velocity_changes'][0]), manager=self.manager)  # 620
                             case 2:
                                 self.fast_velocity_change_tb_2 = pygame_gui.elements.UITextEntryLine(
                                     relative_rect=pygame.Rect(
                                         (self.treadmill_display_right + 330, 616), (40, 20)),
-                                    initial_text=str(values['fast_velocity_changes'][1]), manager=self.manager)  # 620
+                                    initial_text=str(self.values['fast_velocity_changes'][1]), manager=self.manager)  # 620
                             case 3:
                                 self.fast_velocity_change_tb_3 = pygame_gui.elements.UITextEntryLine(
                                     relative_rect=pygame.Rect(
                                         (self.treadmill_display_right + 380, 616), (40, 20)),
-                                    initial_text=str(values['fast_velocity_changes'][2]), manager=self.manager)  # 620
+                                    initial_text=str(self.values['fast_velocity_changes'][2]), manager=self.manager)  # 620
                             case 4:
                                 self.fast_velocity_change_tb_4 = pygame_gui.elements.UITextEntryLine(
                                     relative_rect=pygame.Rect(
                                         (self.treadmill_display_right + 430, 616), (40, 20)),
-                                    initial_text=str(values['fast_velocity_changes'][3]), manager=self.manager)  # 620
+                                    initial_text=str(self.values['fast_velocity_changes'][3]), manager=self.manager)  # 620
                             case 5:
                                 self.fast_velocity_change_tb_5 = pygame_gui.elements.UITextEntryLine(
                                     relative_rect=pygame.Rect(
                                         (self.treadmill_display_right + 480, 616), (40, 20)),
-                                    initial_text=str(values['fast_velocity_changes'][4]), manager=self.manager)  # 620
+                                    initial_text=str(self.values['fast_velocity_changes'][4]), manager=self.manager)  # 620
 
-    def events(self, values):
+    def events(self):
         for event in pygame.event.get():
             # if event object type is QUIT
             # then quitting the pygame
@@ -611,13 +632,13 @@ class BertecSelfSelectedSpeedGUI:
 
             if event.type == pygame_gui.UI_CHECK_BOX_CHECKED:
                 if event.ui_element == self.dead_zone_cb:
-                    values['dead_zone'] = True
+                    self.values['dead_zone'] = True
                 if event.ui_element == self.stop_zone_cb:
-                    values['stop_zone'] = True
+                    self.values['stop_zone'] = True
                 if self.slow_step:
                     if event.ui_element == self.slow_equally_spaced_cb:
-                        values['slow_eq_sp'] = True
-                        slow_current_delete = values['amount_slow_divisions']
+                        self.values['slow_eq_sp'] = True
+                        slow_current_delete = self.values['amount_slow_divisions']
                         while slow_current_delete > 0:
                             match slow_current_delete:
                                 case 5:
@@ -638,8 +659,8 @@ class BertecSelfSelectedSpeedGUI:
                                                      22))
                 if self.fast_step:
                     if event.ui_element == self.fast_equally_spaced_cb:
-                        values['fast_eq_sp'] = True
-                        fast_current_delete = values['amount_fast_divisions']
+                        self.values['fast_eq_sp'] = True
+                        fast_current_delete = self.values['amount_fast_divisions']
                         while fast_current_delete > 0:
                             match fast_current_delete:
                                 case 5:
@@ -661,56 +682,56 @@ class BertecSelfSelectedSpeedGUI:
 
             if event.type == pygame_gui.UI_CHECK_BOX_UNCHECKED:
                 if event.ui_element == self.dead_zone_cb:
-                    values['dead_zone'] = False
+                    self.values['dead_zone'] = False
                 if event.ui_element == self.stop_zone_cb:
-                    values['stop_zone'] = False
+                    self.values['stop_zone'] = False
                 if self.slow_step:
                     if event.ui_element == self.slow_equally_spaced_cb:
-                        values['slow_eq_sp'] = False
-                        slow_current_add = values['amount_slow_divisions']
+                        self.values['slow_eq_sp'] = False
+                        slow_current_add = self.values['amount_slow_divisions']
                         while slow_current_add > 0:
                             match slow_current_add:
                                 case 5:
-                                    self.create_step_text_box(values, 'slow', 'division_location', 5)
+                                    self.create_step_text_box('slow', 'division_location', 5)
                                 case 4:
-                                    self.create_step_text_box(values, 'slow', 'division_location', 4)
+                                    self.create_step_text_box('slow', 'division_location', 4)
                                 case 3:
-                                    self.create_step_text_box(values, 'slow', 'division_location', 3)
+                                    self.create_step_text_box('slow', 'division_location', 3)
                                 case 2:
-                                    self.create_step_text_box(values, 'slow', 'division_location', 2)
+                                    self.create_step_text_box('slow', 'division_location', 2)
                             slow_current_add -= 1
 
                 if self.fast_step:
                     if event.ui_element == self.fast_equally_spaced_cb:
-                        values['fast_eq_sp'] = False
-                        fast_current_add = values['amount_fast_divisions']
+                        self.values['fast_eq_sp'] = False
+                        fast_current_add = self.values['amount_fast_divisions']
                         while fast_current_add > 0:
                             match fast_current_add:
                                 case 5:
-                                    self.create_step_text_box(values, 'fast', 'division_location', 5)
+                                    self.create_step_text_box('fast', 'division_location', 5)
                                 case 4:
-                                    self.create_step_text_box(values, 'fast', 'division_location', 4)
+                                    self.create_step_text_box('fast', 'division_location', 4)
                                 case 3:
-                                    self.create_step_text_box(values, 'fast', 'division_location', 3)
+                                    self.create_step_text_box('fast', 'division_location', 3)
                                 case 2:
-                                    self.create_step_text_box(values, 'fast', 'division_location', 2)
+                                    self.create_step_text_box('fast', 'division_location', 2)
                             fast_current_add -= 1
 
             if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
                 if event.ui_element == self.dead_zone_tb:
-                    values['dead_zone_height'] = float(event.text)
+                    self.values['dead_zone_height'] = float(event.text)
                 if event.ui_element == self.stop_zone_tb:
-                    values['stop_zone_height'] = float(event.text)
+                    self.values['stop_zone_height'] = float(event.text)
                 if event.ui_element == self.origin_location_tb:
-                    values['origin_location'] = float(event.text)
+                    self.values['origin_location'] = float(event.text)
                 if event.ui_element == self.neutral_zone_location_tb:
-                    values['neutral_zone_location'] = float(event.text)
+                    self.values['neutral_zone_location'] = float(event.text)
                 if event.ui_element == self.neutral_zone_height_tb:
-                    values['neutral_zone_height'] = float(event.text)
+                    self.values['neutral_zone_height'] = float(event.text)
                 if self.fast_step:
                     if event.ui_element == self.fast_divisions_tb:
-                        values['amount_fast_divisions'] = int(event.text)
-                        fast_diff = self.previous_amount_fast-values['amount_fast_divisions']
+                        self.values['amount_fast_divisions'] = int(event.text)
+                        fast_diff = self.previous_amount_fast-self.values['amount_fast_divisions']
                         if fast_diff > 0:
                             fast_current_delete = self.previous_amount_fast
                             while fast_diff > 0:
@@ -750,61 +771,65 @@ class BertecSelfSelectedSpeedGUI:
                                 fast_diff -= 1
 
                         elif fast_diff < 0:
-                            fast_current_add = values['amount_fast_divisions']
+                            fast_current_add = self.values['amount_fast_divisions']
                             while fast_diff < 0:
                                 if fast_current_add == 5:
-                                    self.create_step_text_box(values, 'fast', 'velocity_change', 5)
-                                    self.create_step_text_box(values, 'fast', 'division_location', 5)
+                                    self.create_step_text_box('fast', 'velocity_change', 5)
+                                    if not self.values['fast_eq_sp']:
+                                        self.create_step_text_box('fast', 'division_location', 5)
                                 if fast_current_add == 4:
-                                    self.create_step_text_box(values, 'fast', 'velocity_change', 4)
-                                    self.create_step_text_box(values, 'fast', 'division_location', 4)
+                                    self.create_step_text_box('fast', 'velocity_change', 4)
+                                    if not self.values['fast_eq_sp']:
+                                        self.create_step_text_box('fast', 'division_location', 4)
 
                                 if fast_current_add == 3:
-                                    self.create_step_text_box(values, 'fast', 'velocity_change', 3)
-                                    self.create_step_text_box(values, 'fast', 'division_location', 3)
+                                    self.create_step_text_box('fast', 'velocity_change', 3)
+                                    if not self.values['fast_eq_sp']:
+                                        self.create_step_text_box('fast', 'division_location', 3)
                                 if fast_current_add == 2:
-                                    self.create_step_text_box(values, 'fast', 'velocity_change', 2)
-                                    self.create_step_text_box(values, 'fast', 'division_location', 2)
+                                    self.create_step_text_box('fast', 'velocity_change', 2)
+                                    if not self.values['fast_eq_sp']:
+                                        self.create_step_text_box('fast', 'division_location', 2)
                                 fast_current_add -= 1
                                 fast_diff += 1
-                        self.previous_amount_fast = values['amount_fast_divisions']
+                        self.previous_amount_fast = self.values['amount_fast_divisions']
 
-                    fast_loop = values['amount_fast_divisions']
+                    fast_loop = self.values['amount_fast_divisions']
                     if event.ui_element == self.fast_velocity_change_tb_1:
-                        values['fast_velocity_changes'][0] = float(event.text)
+                        self.values['fast_velocity_changes'][0] = float(event.text)
                     while fast_loop > 1:
                         match fast_loop:
                             case 2:
-                                if not values['fast_eq_sp']:
+                                if not self.values['fast_eq_sp']:
                                     if event.ui_element == self.fast_step_location_tb_2:
-                                        values['fast_division_locations'][0] = float(event.text)
+                                        self.values['fast_division_locations'][0] = float(event.text)
                                 if event.ui_element == self.fast_velocity_change_tb_2:
-                                    values['fast_velocity_changes'][1] = float(event.text)
+                                    self.values['fast_velocity_changes'][1] = float(event.text)
                             case 3:
-                                if not values['fast_eq_sp']:
+                                if not self.values['fast_eq_sp']:
                                     if event.ui_element == self.fast_step_location_tb_3:
-                                        values['fast_division_locations'][1] = float(event.text)
+                                        self.values['fast_division_locations'][1] = float(event.text)
                                 if event.ui_element == self.fast_velocity_change_tb_3:
-                                    values['fast_velocity_changes'][2] = float(event.text)
+                                    self.values['fast_velocity_changes'][2] = float(event.text)
                             case 4:
-                                if not values['fast_eq_sp']:
+                                if not self.values['fast_eq_sp']:
                                     if event.ui_element == self.fast_step_location_tb_4:
-                                        values['fast_division_locations'][2] = float(event.text)
+                                        self.values['fast_division_locations'][2] = float(event.text)
                                 if event.ui_element == self.fast_velocity_change_tb_4:
-                                    values['fast_velocity_changes'][3] = float(event.text)
+                                    self.values['fast_velocity_changes'][3] = float(event.text)
                             case 5:
-                                if not values['fast_eq_sp']:
+                                if not self.values['fast_eq_sp']:
                                     if event.ui_element == self.fast_step_location_tb_5:
-                                        values['fast_division_locations'][3] = float(event.text)
+                                        self.values['fast_division_locations'][3] = float(event.text)
                                 if event.ui_element == self.fast_velocity_change_tb_5:
-                                    values['fast_velocity_changes'][4] = float(event.text)
+                                    self.values['fast_velocity_changes'][4] = float(event.text)
 
                         fast_loop -= 1
 
                 if self.slow_step:
                     if event.ui_element == self.slow_divisions_tb:
-                        values['amount_slow_divisions'] = int(event.text)
-                        slow_diff = self.previous_amount_slow - values['amount_slow_divisions']
+                        self.values['amount_slow_divisions'] = int(event.text)
+                        slow_diff = self.previous_amount_slow - self.values['amount_slow_divisions']
                         if slow_diff > 0:
                             slow_current_delete = self.previous_amount_slow
                             while slow_diff > 0:
@@ -844,95 +869,99 @@ class BertecSelfSelectedSpeedGUI:
                                 slow_diff -= 1
 
                         elif slow_diff < 0:
-                            slow_current_add = values['amount_slow_divisions']
+                            slow_current_add = self.values['amount_slow_divisions']
                             while slow_diff < 0:
                                 if slow_current_add == 5:
-                                    self.create_step_text_box(values, 'slow', 'velocity_change', 5)
-                                    self.create_step_text_box(values, 'slow', 'division_location', 5)
+                                    self.create_step_text_box('slow', 'velocity_change', 5)
+                                    if not self.values['slow_eq_sp']:
+                                        self.create_step_text_box('slow', 'division_location', 5)
                                 if slow_current_add == 4:
-                                    self.create_step_text_box(values, 'slow', 'velocity_change', 4)
-                                    self.create_step_text_box(values, 'slow', 'division_location', 4)
+                                    self.create_step_text_box('slow', 'velocity_change', 4)
+                                    if not self.values['slow_eq_sp']:
+                                        self.create_step_text_box('slow', 'division_location', 4)
                                 if slow_current_add == 3:
-                                    self.create_step_text_box(values, 'slow', 'velocity_change', 3)
-                                    self.create_step_text_box(values, 'slow', 'division_location', 3)
+                                    self.create_step_text_box('slow', 'velocity_change', 3)
+                                    if not self.values['slow_eq_sp']:
+                                        self.create_step_text_box('slow', 'division_location', 3)
                                 if slow_current_add == 2:
-                                    self.create_step_text_box(values, 'slow', 'velocity_change', 2)
-                                    self.create_step_text_box(values, 'slow', 'division_location', 2)
+                                    self.create_step_text_box('slow', 'velocity_change', 2)
+                                    if not self.values['slow_eq_sp']:
+                                        self.create_step_text_box('slow', 'division_location', 2)
                                 slow_current_add -= 1
                                 slow_diff += 1
-                        self.previous_amount_slow = values['amount_slow_divisions']
+                        self.previous_amount_slow = self.values['amount_slow_divisions']
 
-                    slow_loop = values['amount_slow_divisions']
+                    slow_loop = self.values['amount_slow_divisions']
                     if event.ui_element == self.slow_velocity_change_tb_1:
-                        values['slow_velocity_changes'][0] = float(event.text)
+                        self.values['slow_velocity_changes'][0] = float(event.text)
                     while slow_loop > 1:
                         match slow_loop:
                             case 2:
-                                if not values['slow_eq_sp']:
+                                if not self.values['slow_eq_sp']:
                                     if event.ui_element == self.slow_step_location_tb_2:
-                                        values['slow_division_locations'][0] = float(event.text)
+                                        self.values['slow_division_locations'][0] = float(event.text)
                                 if event.ui_element == self.slow_velocity_change_tb_2:
-                                    values['slow_velocity_changes'][1] = float(event.text)
+                                    self.values['slow_velocity_changes'][1] = float(event.text)
                             case 3:
-                                if not values['slow_eq_sp']:
+                                if not self.values['slow_eq_sp']:
                                     if event.ui_element == self.slow_step_location_tb_3:
-                                        values['slow_division_locations'][1] = float(event.text)
+                                        self.values['slow_division_locations'][1] = float(event.text)
                                 if event.ui_element == self.slow_velocity_change_tb_3:
-                                    values['slow_velocity_changes'][2] = float(event.text)
+                                    self.values['slow_velocity_changes'][2] = float(event.text)
                             case 4:
-                                if not values['slow_eq_sp']:
+                                if not self.values['slow_eq_sp']:
                                     if event.ui_element == self.slow_step_location_tb_4:
-                                        values['slow_division_locations'][2] = float(event.text)
+                                        self.values['slow_division_locations'][2] = float(event.text)
                                 if event.ui_element == self.slow_velocity_change_tb_4:
-                                    values['slow_velocity_changes'][3] = float(event.text)
+                                    self.values['slow_velocity_changes'][3] = float(event.text)
                             case 5:
-                                if not values['slow_eq_sp']:
+                                if not self.values['slow_eq_sp']:
                                     if event.ui_element == self.slow_step_location_tb_5:
-                                        values['slow_division_locations'][3] = float(event.text)
+                                        self.values['slow_division_locations'][3] = float(event.text)
                                 if event.ui_element == self.slow_velocity_change_tb_5:
-                                    values['slow_velocity_changes'][4] = float(event.text)
+                                    self.values['slow_velocity_changes'][4] = float(event.text)
 
                         slow_loop -= 1
 
                 if self.fast_linear:
                     if event.ui_element == self.fast_linear_slope_tb:
-                        values['slow_linear_slope'] = float(event.text)
+                        self.values['slow_linear_slope'] = float(event.text)
                     if event.ui_element == self.fast_linear_yintercept_tb:
-                        values['slow_linear_yintercept'] = float(event.text)
+                        self.values['slow_linear_yintercept'] = float(event.text)
                 if self.slow_linear:
                     if event.ui_element == self.slow_linear_slope_tb:
-                        values['slow_linear_slope'] = float(event.text)
+                        self.values['slow_linear_slope'] = float(event.text)
                     if event.ui_element == self.slow_linear_yintercept_tb:
-                        values['slow_linear_yintercept'] = float(event.text)
+                        self.values['slow_linear_yintercept'] = float(event.text)
                 if self.fast_equation:
                     if event.ui_element == self.fast_equation_tb:
-                        values['fast_equation'] = event.text
+                        self.values['fast_equation'] = event.text
                 if self.slow_equation:
                     if event.ui_element == self.slow_equation_tb:
-                        values['slow_equation'] = event.text
+                        self.values['slow_equation'] = event.text
                 if event.ui_element == self.sample_frequency_tb:
-                    values['sample_frequency'] = int(event.text)
+                    self.values['sample_frequency'] = int(event.text)
                 if event.ui_element == self.starting_velocity_tb:
-                    values['starting_velocity'] = float(event.text)
+                    self.values['starting_velocity'] = float(event.text)
                 if event.ui_element == self.acceleration_tb:
-                    values['acceleration'] = int(event.text)
+                    self.values['acceleration'] = int(event.text)
             if event.type == pygame_gui.UI_SELECTION_LIST_DROPPED_SELECTION:
                 if event.ui_element == self.slow_control_select:
-                    values = self.clear_slow_control_zone(values)
+                    self.clear_slow_control_zone()
                     self.slow_step = False
                     self.slow_linear = False
                     self.slow_equation = False
 
                 if event.ui_element == self.fast_control_select:
-                    values = self.clear_fast_control_zone(values)
+                    self.clear_fast_control_zone()
                     self.fast_step = False
                     self.fast_linear = False
                     self.fast_equation = False
             if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
                 if event.ui_element == self.slow_control_select:
-                    values = self.clear_slow_control_zone(values)
+                    self.clear_slow_control_zone()
                     if event.text == 'step':
-                        values = self.step_control_layout(values, 'slow')
+                        self.step_control_layout('slow')
                         self.slow_step = True
 
                     if event.text == 'linear':
@@ -944,9 +973,9 @@ class BertecSelfSelectedSpeedGUI:
                         self.slow_equation = True
 
                 if event.ui_element == self.fast_control_select:
-                    values = self.clear_fast_control_zone(values)
+                    self.clear_fast_control_zone()
                     if event.text == 'step':
-                        values = self.step_control_layout(values, 'fast')
+                        self.step_control_layout('fast')
                         self.fast_step = True
 
                     if event.text == 'linear':
@@ -959,16 +988,19 @@ class BertecSelfSelectedSpeedGUI:
 
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == self.start_button:
-                    values['start'] = True
+                    self.values['start'] = True
                 if event.ui_element == self.stop_button:
                     # Set treadmill to speed to 0
-                    values['start'] = False
+                    self.values['start'] = False
                 if event.ui_element == self.end_button:
                     quit()
 
-        return values
+        return self.values
 
     def update(self, time_delta):
         self.manager.update(time_delta)
         self.manager.draw_ui(self.screen)
         pygame.display.update()
+
+    def calc_update(self, values):
+        self.values = values
