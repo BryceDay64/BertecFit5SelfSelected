@@ -21,11 +21,12 @@ try:
               'fast_eq_sp': False,
               'weight_stop': False,
               'wrap': False,
+              'weight_calibration_clicked': False,
               'dead_zone_height': 0.1,
               'stop_zone_height': 0.28,
-              'neutral_zone_height': 0.28,
-              'origin_location': 0.7,
-              'neutral_zone_location': 0.14,
+              'neutral_zone_height': 0.5,
+              'origin_location': 0.8,
+              'neutral_zone_location': 0.25,
               'amount_fast_divisions': 2,
               'amount_slow_divisions': 2,
               'sample_frequency': 20,
@@ -35,6 +36,8 @@ try:
               'velocity_change': 0,
               'copx': 0,
               'copy': 0,
+              'fz': 0,
+              'calibration_weight': 890,
               'slow_linear_slope': 0.001,
               'slow_linear_yintercept': 0,
               'slow_equation': '0.001x',
@@ -42,7 +45,7 @@ try:
               'fast_linear_yintercept': 0,
               'fast_equation': '0.001x',
               'slow_division_locations': [0.112, 0.224, 0.336, 0.448],
-              'slow_velocity_changes': [-0.01, -0.015, -0.02, -0.025, -0.03],
+              'slow_velocity_changes': [-0.02, -0.04, -0.04, -0.04, -0.04],
               'fast_division_locations': [0.112, 0.224, 0.336, 0.448],
               'fast_velocity_changes': [0.01, 0.015, 0.02, 0.025, 0.03],
               'slow_control_type': 'step',
@@ -63,7 +66,7 @@ try:
     velocity_change_first_slow_division = 0.01
 
     treadmill_width = 0.7   # meters
-    treadmill_length = 1.4  # meters
+    treadmill_length = 1.6  # meters
 
     clock = pygame.time.Clock()
 
@@ -86,11 +89,26 @@ try:
             values['slow_zone_height'] = values['origin_location'] - values['neutral_zone_location']
 
         res = remote.get_force_data()
-        values['copx'] = res['copx']
-        values['copy'] = res['copy']
-        fz = res['fz']
+        '''if round(abs(res['copy']-values['copy']), 3) < 0.6:
+            values['copx'] = res['copx']
+            values['copy'] = res['copy']'''
+        values['fz'] = res['fz']
+        if values['weight_calibration_clicked']:
+            if values['calibration_weight']*0.25 < values['fz'] < values['calibration_weight']*1.2:
+                values['copx'] = res['copx']
+                values['copy'] = res['copy']
+                floating = False
+            else:
+                floating = True
+        else:
+            if values['fz'] > 450:
+                values['copx'] = res['copx']
+                values['copy'] = res['copy']
+                floating = False
+            else:
+                floating = True
 
-        if fz > 100:
+        if not floating:
             weight_count = 0
             values['weight_stop'] = False
         else:
@@ -108,9 +126,10 @@ try:
                     positive_velocity = False
                 first_start = False
                 first_stop = True
+                values['wrap'] = False
             else:
                 if values['stop_zone'] and values['copy'] <= values['stop_zone_height']:
-                    quit()
+                    values['start'] = False
                 elif values['copy'] < values['origin_location']-values['neutral_zone_location']:
                     distance_from_neutral = (values['origin_location']
                                              - values['neutral_zone_location'] - values['copy'])

@@ -3,7 +3,7 @@ import pygame_gui
 
 
 class BertecSelfSelectedSpeedGUI:
-    treadmill_length = 1.4  # meters
+    treadmill_length = 1.6  # meters
 
     def __init__(self, values):
 
@@ -38,8 +38,8 @@ class BertecSelfSelectedSpeedGUI:
         self.screen.fill(self.white)
 
         # Set dimensions of treadmill
-        self.treadmill_display_mult = 350
-        self.treadmill_display_length = 1.4 * self.treadmill_display_mult
+        self.treadmill_display_mult = 300
+        self.treadmill_display_length = 1.6 * self.treadmill_display_mult
         self.treadmill_display_width = 0.7 * self.treadmill_display_mult
         self.treadmill_display_top = 0.5 * (self.screen_height - self.treadmill_display_length)
         self.treadmill_display_bottom = self.treadmill_display_top + self.treadmill_display_length
@@ -124,6 +124,9 @@ class BertecSelfSelectedSpeedGUI:
         self.end_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect(
             (self.treadmill_display_right + 350, self.screen_height - 75), (100, 50)),
             text='end', manager=self.manager, allow_double_clicks=False)
+        self.weight_calibration_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect(
+            (self.treadmill_display_right + 210, self.screen_height - 133), (130, 50)), text='weight calibration',
+            manager=self.manager, allow_double_clicks=False)
 
         # dropdown
         self.fast_control_select = pygame_gui.elements.UISelectionList(relative_rect=pygame.Rect(
@@ -279,7 +282,7 @@ class BertecSelfSelectedSpeedGUI:
         pygame.draw.rect(self.screen, self.white, pygame.Rect(30,
                                                               self.treadmill_display_bottom,
                                                               self.treadmill_display_width,
-                                                              5))
+                                                              20))
 
 
     def update_text(self):
@@ -290,12 +293,16 @@ class BertecSelfSelectedSpeedGUI:
                                                               self.screen_height - self.treadmill_display_bottom))
         pygame.draw.rect(self.screen, self.white, pygame.Rect(0,
                                                               0,
-                                                              self.treadmill_display_width + 100,
+                                                              self.treadmill_display_width + 115,
                                                               self.treadmill_display_top - 5))
         pygame.draw.rect(self.screen, self.white, pygame.Rect(599,
                                                               29,
                                                               201,
-                                                              100))
+                                                              300))
+        pygame.draw.rect(self.screen, self.white, pygame.Rect(29,
+                                                              self.treadmill_display_bottom + 30,
+                                                              350,
+                                                              50))
         # Add new text
         current_velocity_text = self.large_font.render(
             'Current Speed: ' + str(round(self.values['current_velocity'], 3))+' m/s', True, self.black)
@@ -1017,6 +1024,18 @@ class BertecSelfSelectedSpeedGUI:
                     self.values['start'] = False
                 if event.ui_element == self.end_button:
                     quit()
+                if event.ui_element == self.weight_calibration_button:
+                    self.values['weight_calibration_clicked'] = True
+                    self.values['calibration_weight'] = self.values['fz']
+                    pygame.draw.rect(self.screen, self.white, pygame.Rect(599,
+                                                                          679,
+                                                                          201,
+                                                                          20))
+                    calibrated_weight_text = self.font.render('Weight Calibrated: ' + str(round(self.values['fz'], 0))
+                                                              + ' N', True, self.black)
+                    self.screen.blit(calibrated_weight_text, (600, 680))
+
+
 
         return self.values
 
